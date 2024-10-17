@@ -12,132 +12,85 @@ This project implements an Inventory and Sales Management API, designed to allow
 4. **Sell Products**: Supports selling multiple products in various units and calculates profit based on the FIFO methodology.
 5. **Sales History**: Provides users with a history of all sales transactions.
 
+- Create and manage products with detailed attributes.
+- Track inventory levels and quantities.
+- Manage multiple unit measurements for each product.
+- Handle sales transactions and calculate profits.
+- Retrieve sales history for analysis.
+
 ## Tech Stack
 
 - **Backend Framework**: Django, Django REST Framework
 - **Database**: PostgreSQL (or any Django-compatible database)
 - **Deployment**: You can use Heroku, Railway, Render, etc.
 
----
-
 ## API Endpoints
 
-### 1. Product Creation
+### 1. Create Product
 
-**URL**: `/api/products/`  
-**Method**: `POST`
+**Endpoint:** `POST /api/products/add_product/`
 
-This endpoint allows users to create a new product.
-
-#### Request Body
+**Request Body:**
 
 ```json
 {
   "product_name": "Noodles",
-  "quantity": 10,
-  "cost_price": 150,
-  "selling_price": 200,
-  "category": 1,
-  "unit_measurements": {
-    "Pack": 200,
-    "Carton": 2400
-  }
+  "quantity": 100,
+  "selling_price": "250.00",
+  "cost_price": "200.00",
+  "category": "Food",
+  "unit_measurements": [
+    {
+      "unit_type": "Pack",
+      "quantity": 20,
+      "price_per_unit": "200.00"
+    },
+    {
+      "unit_type": "Carton",
+      "quantity": 5,
+      "price_per_unit": "2400.00"
+    }
+  ]
 }
 ```
 
-| Field             | Type     | Description                                    |
-|-------------------|----------|------------------------------------------------|
-| product_name       | string   | Name of the product                            |
-| quantity           | integer  | Initial quantity available                     |
-| cost_price         | decimal  | Cost price of the product                      |
-| selling_price      | decimal  | Selling price of the product                   |
-| category           | integer  | Foreign key to the product category            |
-| unit_measurements  | JSON     | Dictionary mapping units to their selling price|
+**Response:**
 
-#### Response Example
-
-```json
-{
-  "id": 1,
-  "product_name": "Noodles",
-  "quantity": 10,
-  "cost_price": 150,
-  "selling_price": 200,
-  "category": 1,
-  "unit_measurements": {
-    "Pack": 200,
-    "Carton": 2400
-  }
-}
-```
-
----
+- `201 Created` - When the product is successfully created.
+- `400 Bad Request` - If there are validation errors.
 
 ### 2. Retrieve Product Information
 
-**URL**: `/api/products/<product_id>/`  
-**Method**: `GET`
+**Endpoint:** `GET /api/products/`
 
-This endpoint retrieves detailed information about a specific product by its ID.
+**Response:**
 
-#### Response Example
-
-```json
-{
-  "id": 1,
-  "product_name": "Noodles",
-  "quantity": 10,
-  "cost_price": 150,
-  "selling_price": 200,
-  "category": 1,
-  "unit_measurements": {
-    "Pack": 200,
-    "Carton": 2400
-  }
-}
-```
-
----
+- Returns a list of products with their details.
 
 ### 3. Add Quantity to Products
 
-**URL**: `/api/products/<product_id>/add_quantity/`  
-**Method**: `PATCH`
+**Endpoint:** `POST /api/products/add_quantity/`
 
-This endpoint allows users to add stock to an existing product while keeping track of different cost prices for each batch.
-
-#### Request Body
+**Request Body:**
 
 ```json
 {
+  "product_id": 1,
   "quantity": 10,
-  "cost_price": 180
+  "cost_price": "220.00"
 }
 ```
 
-| Field       | Type    | Description                         |
-|-------------|---------|-------------------------------------|
-| quantity    | integer | Number of units being added         |
-| cost_price  | decimal | Cost price for the new batch        |
+**Response:**
 
-#### Response Example
-
-```json
-{
-  "message": "Quantity added successfully"
-}
-```
-
----
+- `200 OK` - When the quantity is successfully added.
+- `404 Not Found` - If the product does not exist.
 
 ### 4. Sell Products
 
-**URL**: `/api/sales/`  
-**Method**: `POST`
+**Endpoint:** `POST /api/sales/sell_product/`
 
-This endpoint processes sales transactions for multiple products and calculates profits based on the FIFO method.
-
-#### Request Body
+**Request Body:**
 
 ```json
 {
@@ -145,62 +98,42 @@ This endpoint processes sales transactions for multiple products and calculates 
     {
       "product_id": 1,
       "quantity": 2,
-      "unit": "Pack"
+      "unit_type": "Pack"
     },
     {
-      "product_id": 2,
+      "product_id": 1,
       "quantity": 1,
-      "unit": "Carton"
+      "unit_type": "Carton"
     }
   ]
 }
 ```
 
-| Field        | Type     | Description                                       |
-|--------------|----------|---------------------------------------------------|
-| product_id   | integer  | ID of the product being sold                      |
-| quantity     | integer  | Quantity of units being sold                      |
-| unit         | string   | Unit of measurement (e.g., "Pack", "Carton")      |
+**Response:**
 
-#### Response Example
-
-```json
-{
-  "total_profit": 300
-}
-```
-
----
+- `200 OK` - When the sale is successfully processed.
+- `400 Bad Request` - If there are validation errors.
 
 ### 5. Retrieve Sales History
 
-**URL**: `/api/sales/`  
-**Method**: `GET`
+**Endpoint:** `GET /api/sales/history/`
 
-This endpoint retrieves the sales history of the user, including product details, quantity sold, unit, and profit.
+**Response:**
 
-#### Response Example
+- Returns a list of sales transactions with their details.
 
-```json
-[
-  {
-    "product": "Noodles",
-    "quantity_sold": 2,
-    "unit": "Pack",
-    "profit": 100,
-    "created_at": "2024-10-15T08:00:00Z"
-  },
-  {
-    "product": "Rice",
-    "quantity_sold": 1,
-    "unit": "Carton",
-    "profit": 200,
-    "created_at": "2024-10-15T08:10:00Z"
-  }
-]
-```
+## Usage
 
----
+You can test the API endpoints using tools like Postman or cURL. Make sure to include the appropriate headers and request body as specified in the API endpoints section.
+
+## Documentation
+
+The API documentation is generated using Swagger UI and can be accessed by visiting:
+
+`http://<your-server-url>/`
+
+`http://<your-server-url>/redoc/`
+
 
 ## Setup Instructions
 
